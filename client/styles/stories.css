@@ -1,0 +1,63 @@
+/* Stories Page Layout */
+#page-stories {
+  background: var(--snap-grey);
+  padding: 80px 20px 80px 20px;
+  overflow-y: auto;
+}
+
+.stories-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.my-story-card {
+  display: flex;
+  align-items: center;
+  background: var(--snap-light-grey);
+  padding: 16px;
+  border-radius: var(--snap-border-radius);
+  gap: 16px;
+  cursor: pointer;
+}
+
+.story-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--snap-yellow);
+  color: var(--snap-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.story-info h3 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.story-info p {
+  font-size: 13px;
+  color: #8E8E93;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.stories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* iPad Responsive Grid Adjustment */
+@media (min-width: 768px) {
+  .stories-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
