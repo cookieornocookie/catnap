@@ -1,0 +1,152 @@
+/* Camera Container Layout */
+.camera-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--snap-black);
+  overflow: hidden;
+}
+
+#camera-feed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Hidden canvas used purely for snapshot processing */
+.hidden-canvas {
+  display: none;
+}
+
+/* Overlay canvas for touch drawing */
+#drawing-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  touch-action: none;
+}
+
+/* Filters Carousel Bar */
+.filters-carousel {
+  position: absolute;
+  bottom: 120px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  z-index: 20;
+  padding: 0 20px;
+  overflow-x: auto;
+}
+
+.filter-pill {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.filter-pill.active {
+  background: var(--snap-yellow);
+  color: var(--snap-black);
+  border-color: var(--snap-yellow);
+  font-weight: bold;
+}
+
+/* Camera CSS Filters */
+.filter-sepia { filter: sepia(0.8) contrast(1.1); }
+.filter-grayscale { filter: grayscale(1); }
+.filter-vivid { filter: saturate(2) contrast(1.2); }
+.filter-invert { filter: invert(0.9); }
+
+/* Vertical Camera Toolbar */
+.camera-tools-side {
+  position: absolute;
+  top: 90px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 20;
+}
+
+.tool-btn {
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: white;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.tool-btn select, .tool-btn input[type="color"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Caption Input Overlay */
+.caption-input-container {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 15;
+  padding: 0 10px;
+}
+
+#snap-caption-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  color: white;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 12px;
+  outline: none;
+}
+
+/* Shutter Button */
+.shutter-wrapper {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+.shutter-button {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 6px solid #FFFFFF;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.shutter-button:active {
+  transform: scale(0.88);
+  background: rgba(255, 255, 255, 0.3);
+}
