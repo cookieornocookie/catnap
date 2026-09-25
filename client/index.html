@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Snapchat</title>
+
+  <!-- PWA & iOS Safari Home Screen Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Snapchat">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/camera.css">
+  <link rel="stylesheet" href="/styles/chat.css">
+  <link rel="stylesheet" href="/styles/stories.css">
+  <link rel="stylesheet" href="/styles/components.css">
+
+  <!-- Socket.io Client Library -->
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app-viewport">
+
+    <!-- Top iOS Header Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button id="profile-btn" class="icon-btn bitmoji-avatar" aria-label="Profile">
+          <div class="avatar-circle">👻</div>
+        </button>
+        <button id="search-btn" class="icon-btn search-icon" aria-label="Search">🔍</button>
+      </div>
+      <div class="top-bar-center">
+        <span id="app-title">Snapchat</span>
+      </div>
+      <div class="top-bar-right">
+        <button id="add-friend-btn" class="icon-btn" aria-label="Add Friend">👤+</button>
+      </div>
+    </header>
+
+    <!-- iOS Web Push Enable Prompt Banner -->
+    <div id="pwa-push-banner" class="push-banner">
+      <div class="banner-text">
+        <strong>Enable Push Notifications</strong>
+        <span>Get notified instantly when friends send you Snaps</span>
+      </div>
+      <button id="enable-push-btn" class="banner-btn">Enable</button>
+    </div>
+
+    <!-- MAIN VIEWS (TAB PAGES) -->
+    <main id="main-content">
+
+      <!-- 1. CAMERA PAGE (DEFAULT) -->
+      <section id="page-camera" class="tab-page active">
+        <div class="camera-container">
+          <!-- Live Camera Video Feed -->
+          <video id="camera-feed" playsinline autoplay muted></video>
+
+          <!-- Canvas Layer for Snapshot & Text Caption Compositing -->
+          <canvas id="snap-canvas" class="hidden-canvas"></canvas>
+
+          <!-- Overlay Canvas Layer for Real-Time Touch Drawing -->
+          <canvas id="drawing-canvas"></canvas>
+
+          <!-- AR Filters Bar -->
+          <div class="filters-carousel">
+            <button class="filter-pill active" onclick="window.app.camera.setFilter('none')">Normal</button>
+            <button class="filter-pill" onclick="window.app.camera.setFilter('sepia')">Warm</button>
+            <button class="filter-pill" onclick="window.app.camera.setFilter('grayscale')">B&W</button>
+            <button class="filter-pill" onclick="window.app.camera.setFilter('vivid')">Vivid</button>
+            <button class="filter-pill" onclick="window.app.camera.setFilter('invert')">X-Ray</button>
+          </div>
+
+          <!-- Vertical Camera Tools Side Panel -->
+          <div class="camera-tools-side">
+            <button id="tool-flip" class="tool-btn" title="Flip Camera" onclick="window.app.camera.startCamera('environment')">🔄</button>
+            <button id="tool-timer" class="tool-btn" title="Snap Duration">
+              ⏱️
+              <select id="timer-select" onchange="window.app.camera.setTimer(this.value)">
+                <option value="3">3s</option>
+                <option value="5">5s</option>
+                <option value="10" selected>10s</option>
+              </select>
+            </button>
+            <button id="tool-draw-color" class="tool-btn" title="Drawing Color">
+              🎨
+              <input type="color" id="draw-color-picker" value="#FFFC00" onchange="window.app.camera.setDrawColor(this.value)">
+            </button>
+            <button id="tool-clear-draw" class="tool-btn" title="Clear Drawing" onclick="window.app.camera.clearDrawing()">🗑️</button>
+          </div>
+
+          <!-- Bottom Caption Overlay Input -->
+          <div class="caption-input-container">
+            <input type="text" id="snap-caption-input" placeholder="Tap to add caption..." oninput="window.app.camera.setCaption(this.value)" maxlength="60">
+          </div>
+
+          <!-- Capture Shutter Button -->
+          <div class="shutter-wrapper">
+            <button id="shutter-btn" class="shutter-button" aria-label="Take Snap"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. CHAT & FEED PAGE -->
+      <section id="page-chat" class="tab-page">
+        <!-- Friends List & Snap Feed -->
+        <div id="chat-feed-view" class="chat-feed">
+          <div class="feed-header">
+            <h2>Chat</h2>
+            <button class="icon-btn-small" onclick="prompt('Enter Friend\'s User ID to Chat:')">💬 New Chat</button>
+          </div>
+          <div id="chat-feed-list" class="feed-list">
+            <!-- Feed items injected dynamically via app.js -->
+          </div>
+        </div>
+
+        <!-- Active Chat Window (Appears when thread selected) -->
+        <div id="active-chat-window" class="chat-window">
+          <div class="chat-header">
+            <button class="back-btn" onclick="document.getElementById('active-chat-window').classList.remove('active'); window.app.chat.closeChat();">◀ Back</button>
+            <span id="chat-recipient-name" class="recipient-title">Friend</span>
+          </div>
+
+          <!-- Ephemeral Message Feed -->
+          <div id="chat-messages-container" class="messages-container">
+            <!-- Disappearing message bubbles injected dynamically -->
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="chat-input-bar">
+            <button class="chat-camera-icon" onclick="window.app.switchTab('camera')">📷</button>
+            <input type="text" id="chat-text-input" placeholder="Send a chat..." onkeydown="if(event.key==='Enter'){ window.app.chat.sendMessage(this.value); this.value=''; }">
+            <button class="send-btn" onclick="const input = document.getElementById('chat-text-input'); window.app.chat.sendMessage(input.value); input.value='';">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. STORIES PAGE -->
+      <section id="page-stories" class="tab-page">
+        <div class="stories-container">
+          <h2>Stories</h2>
+          
+          <!-- My Story Section -->
+          <div class="my-story-card">
+            <div class="story-avatar">➕</div>
+            <div class="story-info">
+              <h3>Add to My Story</h3>
+              <p>Share a Snap to your story</p>
+            </div>
+          </div>
+
+          <!-- Friends Stories Grid -->
+          <h3 class="section-title">Recent Updates</h3>
+          <div id="stories-grid" class="stories-grid">
+            <!-- Dynamically populated story thumbnails -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION TAB BAR -->
+    <nav class="bottom-nav">
+      <button id="nav-chat" class="nav-btn">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">Chat</span>
+      </button>
+      <button id="nav-camera" class="nav-btn active">
+        <span class="nav-icon camera-icon-nav">📷</span>
+        <span class="nav-label">Camera</span>
+      </button>
+      <button id="nav-stories" class="nav-btn">
+        <span class="nav-icon">🎴</span>
+        <span class="nav-label">Stories</span>
+      </button>
+    </nav>
+
+    <!-- FULLSCREEN MODAL: EPHEMERAL SNAP VIEWER -->
+    <div id="snap-viewer-modal" class="fullscreen-modal">
+      <div id="snap-countdown-timer" class="snap-timer-badge">10</div>
+      <img id="snap-viewer-img" src="" alt="Incoming Snap">
+      <div class="snap-touch-dismiss-hint">Tap anywhere to dismiss</div>
+    </div>
+
+    <!-- FULLSCREEN MODAL: STORIES VIEWER -->
+    <div id="story-viewer-modal" class="fullscreen-modal">
+      <div class="story-progress-bar-container">
+        <div id="story-progress-bar-fill" class="story-progress-fill"></div>
+      </div>
+      <img id="story-media-image" src="" alt="Story Media">
+    </div>
+
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
